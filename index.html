@@ -453,12 +453,30 @@
 
 </div>
 
-<script>
-  // Data store
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCQ-6j4Vqv9mp0_HLQk8EqvadwO6UYIi1c",
+    authDomain: "personal-finance-de0b8.firebaseapp.com",
+    databaseURL: "https://personal-finance-de0b8-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "personal-finance-de0b8",
+    storageBucket: "personal-finance-de0b8.firebasestorage.app",
+    messagingSenderId: "412205591301",
+    appId: "1:412205591301:web:012e56136226a095695bac",
+    measurementId: "G-Z4HR3W5DSK"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  // Local data mirror
   const data = {
-    shop:     { income: [], expense: [] },
-    personal: { income: [], expense: [] },
-    debts: []
+    shop:     { income: {}, expense: {} },
+    personal: { income: {}, expense: {} },
+    debts: {}
   };
 
   function fmt(n) {
@@ -469,7 +487,24 @@
     return new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
   }
 
-  function addEntry(section, type) {
+  // ── Firebase listeners ──────────────────────────────────────────
+  function listenPath(path, target) {
+    onValue(ref(db, path), snap => {
+      // clear then repopulate
+      Object.keys(target).forEach(k => delete target[k]);
+      if (snap.exists()) Object.assign(target, snap.val());
+      renderAll();
+    });
+  }
+
+  listenPath('shop/income',     data.shop.income);
+  listenPath('shop/expense',    data.shop.expense);
+  listenPath('personal/income', data.personal.income);
+  listenPath('personal/expense',data.personal.expense);
+  listenPath('debts',           data.debts);
+
+  // ── Add / Delete ────────────────────────────────────────────────
+  window.addEntry = function(section, type) {
     const nameEl   = document.getElementById(`${section}-${type === 'income' ? 'in' : 'out'}-name`);
     const amountEl = document.getElementById(`${section}-${type === 'income' ? 'in' : 'out'}-amount`);
     const name   = nameEl.value.trim();
@@ -481,18 +516,16 @@
       return;
     }
 
-    data[section][type].push({ id: Date.now(), name, amount, date: today() });
+    push(ref(db, `${section}/${type}`), { name, amount, date: today() });
     nameEl.value = '';
     amountEl.value = '';
-    renderAll();
-  }
+  };
 
-  function deleteEntry(section, type, id) {
-    data[section][type] = data[section][type].filter(e => e.id !== id);
-    renderAll();
-  }
+  window.deleteEntry = function(section, type, id) {
+    remove(ref(db, `${section}/${type}/${id}`));
+  };
 
-  function addDebt() {
+  window.addDebt = function() {
     const nameEl   = document.getElementById('debt-name');
     const amountEl = document.getElementById('debt-amount');
     const name   = nameEl.value.trim();
@@ -504,32 +537,32 @@
       return;
     }
 
-    data.debts.push({ id: Date.now(), name, amount });
+    push(ref(db, 'debts'), { name, amount });
     nameEl.value = '';
     amountEl.value = '';
-    renderAll();
-  }
+  };
 
-  function deleteDebt(id) {
-    data.debts = data.debts.filter(d => d.id !== id);
-    renderAll();
-  }
+  window.deleteDebt = function(id) {
+    remove(ref(db, `debts/${id}`));
+  };
 
+  // ── Render ───────────────────────────────────────────────────────
   function renderList(listId, entries, section, type) {
     const el = document.getElementById(listId);
-    if (entries.length === 0) {
+    const arr = Object.entries(entries);
+    if (arr.length === 0) {
       el.innerHTML = `<div class="empty-msg">No entries yet.</div>`;
       return;
     }
-    el.innerHTML = entries.map(e => `
+    el.innerHTML = arr.map(([id, e]) => `
       <div class="tx-item">
         <div class="tx-info">
           <div class="tx-name">${e.name}</div>
-          <div class="tx-date">${e.date}</div>
+          <div class="tx-date">${e.date || ''}</div>
         </div>
         <div class="tx-right">
           <div class="tx-amount ${type}">${type === 'income' ? '+' : '-'} ${fmt(e.amount)}</div>
-          <button class="btn-del" onclick="deleteEntry('${section}','${type}',${e.id})">✕</button>
+          <button class="btn-del" onclick="deleteEntry('${section}','${type}','${id}')">✕</button>
         </div>
       </div>
     `).join('');
@@ -537,11 +570,12 @@
 
   function renderDebtList() {
     const el = document.getElementById('list-debt');
-    if (data.debts.length === 0) {
+    const arr = Object.entries(data.debts);
+    if (arr.length === 0) {
       el.innerHTML = `<div class="empty-msg">No fixed debts added yet.</div>`;
       return;
     }
-    el.innerHTML = data.debts.map(d => `
+    el.innerHTML = arr.map(([id, d]) => `
       <div class="debt-item">
         <div class="tx-info">
           <div class="tx-name">${d.name}</div>
@@ -549,36 +583,35 @@
         </div>
         <div class="tx-right">
           <div class="debt-amount">${fmt(d.amount)} / mo</div>
-          <button class="btn-del" onclick="deleteDebt(${d.id})">✕</button>
+          <button class="btn-del" onclick="deleteDebt('${id}')">✕</button>
         </div>
       </div>
     `).join('');
   }
 
-  function sum(arr) { return arr.reduce((a, b) => a + b.amount, 0); }
+  function sumObj(obj) {
+    return Object.values(obj).reduce((a, b) => a + (b.amount || 0), 0);
+  }
 
   function renderAll() {
-    // Render lists
     renderList('list-shop-income',      data.shop.income,     'shop',     'income');
     renderList('list-shop-expense',     data.shop.expense,    'shop',     'expense');
     renderList('list-personal-income',  data.personal.income, 'personal', 'income');
     renderList('list-personal-expense', data.personal.expense,'personal', 'expense');
     renderDebtList();
 
-    // Compute subtotals
-    const si = sum(data.shop.income);
-    const se = sum(data.shop.expense);
-    const pi = sum(data.personal.income);
-    const pe = sum(data.personal.expense);
-    const td = sum(data.debts);
+    const si = sumObj(data.shop.income);
+    const se = sumObj(data.shop.expense);
+    const pi = sumObj(data.personal.income);
+    const pe = sumObj(data.personal.expense);
+    const td = sumObj(data.debts);
 
-    document.getElementById('total-shop-income').textContent     = fmt(si);
-    document.getElementById('total-shop-expense').textContent    = fmt(se);
-    document.getElementById('total-personal-income').textContent = fmt(pi);
-    document.getElementById('total-personal-expense').textContent= fmt(pe);
-    document.getElementById('total-debt').textContent            = fmt(td);
+    document.getElementById('total-shop-income').textContent      = fmt(si);
+    document.getElementById('total-shop-expense').textContent     = fmt(se);
+    document.getElementById('total-personal-income').textContent  = fmt(pi);
+    document.getElementById('total-personal-expense').textContent = fmt(pe);
+    document.getElementById('total-debt').textContent             = fmt(td);
 
-    // Summary bar
     const totalIncome  = si + pi;
     const totalExpense = se + pe;
     const net = totalIncome - totalExpense - td;
@@ -592,15 +625,12 @@
     netEl.style.color = net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
   }
 
-  function switchTab(tab) {
+  window.switchTab = function(tab) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`section-${tab}`).classList.add('active');
     event.target.classList.add('active');
-  }
-
-  // Init
-  renderAll();
+  };
 </script>
 </body>
 </html>
