@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finance Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --surface2: #f2f4f7;
+      --border: #e4e7ed;
+      --text: #1a1d23;
+      --muted: #3a3d45;
+      --accent-green: #16a34a;
+      --accent-green-bg: #f0fdf4;
+      --accent-red: #dc2626;
+      --accent-red-bg: #fef2f2;
+      --accent-yellow: #d97706;
+      --accent-yellow-bg: #fffbeb;
+      --accent-blue: #2563eb;
+      --accent-blue-bg: #eff6ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      padding: 32px 20px 60px;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+
+    /* Summary Bar */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .summary-card .label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .summary-card .amount {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .summary-card.green .amount  { color: var(--accent-green); }
+    .summary-card.red .amount    { color: var(--accent-red); }
+    .summary-card.yellow .amount { color: var(--accent-yellow); }
+    .summary-card.net .amount    { color: var(--text); }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 4px;
+      width: fit-content;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Panel */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* Form */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    @media (max-width: 520px) {
+      .form-row { grid-template-columns: 1fr 1fr; }
+      .form-row .btn-add { grid-column: 1 / -1; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+
+    .field label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .field input, .field select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem;
+      padding: 9px 12px;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.18s, background 0.18s;
+      width: 100%;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--accent-blue);
+      background: #fff;
+    }
+
+    .btn-add {
+      background: var(--text);
+      color: #fff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.18s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover { opacity: 0.8; }
+    .btn-add:active { transform: scale(0.97); }
+
+    /* Transaction list */
+    .tx-list { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+
+    .tx-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+      border-radius: 9px;
+      padding: 10px 14px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tx-info { display: flex; flex-direction: column; gap: 2px; }
+
+    .tx-name {
+      font-size: 0.87rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .tx-date {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .tx-right { display: flex; align-items: center; gap: 10px; }
+
+    .tx-amount {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .tx-amount.income  { color: var(--accent-green); }
+    .tx-amount.expense { color: var(--accent-red); }
+
+    .btn-del {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.65rem;
+      transition: all 0.18s;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .btn-del:hover { border-color: var(--accent-red); color: var(--accent-red); background: var(--accent-red-bg); }
+
+    .empty-msg {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      padding: 18px 0;
+    }
+
+    /* Debt section */
+    .debt-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    @media (max-width: 520px) {
+      .debt-form-row { grid-template-columns: 1fr 1fr; }
+      .debt-form-row .btn-add { grid-column: 1 / -1; }
+    }
+
+    .debt-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--accent-yellow-bg);
+      border: 1px solid #fde68a;
+      border-radius: 9px;
+      padding: 10px 14px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .debt-amount {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-yellow);
+    }
+
+    /* Totals row inside panel */
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+    }
+
+    .totals-row span { color: var(--muted); font-weight: 500; }
+    .totals-row strong { font-size: 0.95rem; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Finance Manager</h1>
+  <p>Track · Control · Grow</p>
+</header>
+
+<!-- Summary Bar -->
+<div class="summary-bar">
+  <div class="summary-card green">
+    <div class="label">Total Income</div>
+    <div class="amount" id="sum-income">Rp 0</div>
+  </div>
+  <div class="summary-card red">
+    <div class="label">Total Expenses</div>
+    <div class="amount" id="sum-expense">Rp 0</div>
+  </div>
+  <div class="summary-card yellow">
+    <div class="label">Fixed Debts/mo</div>
+    <div class="amount" id="sum-debt">Rp 0</div>
+  </div>
+  <div class="summary-card net">
+    <div class="label">Net Balance</div>
+    <div class="amount" id="sum-net">Rp 0</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('shop')">🏪 Shop</button>
+  <button class="tab-btn" onclick="switchTab('personal')">🏠 Personal</button>
+  <button class="tab-btn" onclick="switchTab('debt')">📌 Fixed Debts</button>
+</div>
+
+<!-- SHOP SECTION -->
+<div class="section active" id="section-shop">
+
+  <div class="panel">
+    <div class="panel-title">Shop Income</div>
+    <div class="form-row">
+      <div class="field">
+        <label>Description</label>
+        <input type="text" id="shop-in-name" placeholder="e.g. Sales today"/>
+      </div>
+      <div class="field">
+        <label>Amount (Rp)</label>
+        <input type="number" id="shop-in-amount" placeholder="0" min="0"/>
+      </div>
+      <button class="btn-add" onclick="addEntry('shop','income')">+ Add</button>
+    </div>
+    <div class="tx-list" id="list-shop-income"></div>
+    <div class="totals-row">
+      <span>Total Shop Income</span>
+      <strong class="income" id="total-shop-income">Rp 0</strong>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Shop Expenses</div>
+    <div class="form-row">
+      <div class="field">
+        <label>Description</label>
+        <input type="text" id="shop-out-name" placeholder="e.g. Stock purchase"/>
+      </div>
+      <div class="field">
+        <label>Amount (Rp)</label>
+        <input type="number" id="shop-out-amount" placeholder="0" min="0"/>
+      </div>
+      <button class="btn-add" onclick="addEntry('shop','expense')">+ Add</button>
+    </div>
+    <div class="tx-list" id="list-shop-expense"></div>
+    <div class="totals-row">
+      <span>Total Shop Expenses</span>
+      <strong class="expense" id="total-shop-expense">Rp 0</strong>
+    </div>
+  </div>
+
+</div>
+
+<!-- PERSONAL SECTION -->
+<div class="section" id="section-personal">
+
+  <div class="panel">
+    <div class="panel-title">Personal Income</div>
+    <div class="form-row">
+      <div class="field">
+        <label>Description</label>
+        <input type="text" id="personal-in-name" placeholder="e.g. Salary"/>
+      </div>
+      <div class="field">
+        <label>Amount (Rp)</label>
+        <input type="number" id="personal-in-amount" placeholder="0" min="0"/>
+      </div>
+      <button class="btn-add" onclick="addEntry('personal','income')">+ Add</button>
+    </div>
+    <div class="tx-list" id="list-personal-income"></div>
+    <div class="totals-row">
+      <span>Total Personal Income</span>
+      <strong class="income" id="total-personal-income">Rp 0</strong>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Personal Expenses</div>
+    <div class="form-row">
+      <div class="field">
+        <label>Description</label>
+        <input type="text" id="personal-out-name" placeholder="e.g. Groceries"/>
+      </div>
+      <div class="field">
+        <label>Amount (Rp)</label>
+        <input type="number" id="personal-out-amount" placeholder="0" min="0"/>
+      </div>
+      <button class="btn-add" onclick="addEntry('personal','expense')">+ Add</button>
+    </div>
+    <div class="tx-list" id="list-personal-expense"></div>
+    <div class="totals-row">
+      <span>Total Personal Expenses</span>
+      <strong class="expense" id="total-personal-expense">Rp 0</strong>
+    </div>
+  </div>
+
+</div>
+
+<!-- DEBT SECTION -->
+<div class="section" id="section-debt">
+
+  <div class="panel">
+    <div class="panel-title">Monthly Fixed Debts</div>
+    <div class="debt-form-row">
+      <div class="field">
+        <label>Debt Name</label>
+        <input type="text" id="debt-name" placeholder="e.g. KPR, Kredit motor"/>
+      </div>
+      <div class="field">
+        <label>Monthly Amount (Rp)</label>
+        <input type="number" id="debt-amount" placeholder="0" min="0"/>
+      </div>
+      <button class="btn-add" onclick="addDebt()">+ Add</button>
+    </div>
+    <div class="tx-list" id="list-debt"></div>
+    <div class="totals-row">
+      <span>Total Fixed Debts / Month</span>
+      <strong style="color:var(--accent-yellow)" id="total-debt">Rp 0</strong>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Data store
+  const data = {
+    shop:     { income: [], expense: [] },
+    personal: { income: [], expense: [] },
+    debts: []
+  };
+
+  function fmt(n) {
+    return 'Rp ' + Math.abs(n).toLocaleString('id-ID');
+  }
+
+  function today() {
+    return new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+  }
+
+  function addEntry(section, type) {
+    const nameEl   = document.getElementById(`${section}-${type === 'income' ? 'in' : 'out'}-name`);
+    const amountEl = document.getElementById(`${section}-${type === 'income' ? 'in' : 'out'}-amount`);
+    const name   = nameEl.value.trim();
+    const amount = parseFloat(amountEl.value);
+
+    if (!name || isNaN(amount) || amount <= 0) {
+      amountEl.style.borderColor = 'var(--accent-red)';
+      setTimeout(() => amountEl.style.borderColor = '', 1000);
+      return;
+    }
+
+    data[section][type].push({ id: Date.now(), name, amount, date: today() });
+    nameEl.value = '';
+    amountEl.value = '';
+    renderAll();
+  }
+
+  function deleteEntry(section, type, id) {
+    data[section][type] = data[section][type].filter(e => e.id !== id);
+    renderAll();
+  }
+
+  function addDebt() {
+    const nameEl   = document.getElementById('debt-name');
+    const amountEl = document.getElementById('debt-amount');
+    const name   = nameEl.value.trim();
+    const amount = parseFloat(amountEl.value);
+
+    if (!name || isNaN(amount) || amount <= 0) {
+      amountEl.style.borderColor = 'var(--accent-red)';
+      setTimeout(() => amountEl.style.borderColor = '', 1000);
+      return;
+    }
+
+    data.debts.push({ id: Date.now(), name, amount });
+    nameEl.value = '';
+    amountEl.value = '';
+    renderAll();
+  }
+
+  function deleteDebt(id) {
+    data.debts = data.debts.filter(d => d.id !== id);
+    renderAll();
+  }
+
+  function renderList(listId, entries, section, type) {
+    const el = document.getElementById(listId);
+    if (entries.length === 0) {
+      el.innerHTML = `<div class="empty-msg">No entries yet.</div>`;
+      return;
+    }
+    el.innerHTML = entries.map(e => `
+      <div class="tx-item">
+        <div class="tx-info">
+          <div class="tx-name">${e.name}</div>
+          <div class="tx-date">${e.date}</div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount ${type}">${type === 'income' ? '+' : '-'} ${fmt(e.amount)}</div>
+          <button class="btn-del" onclick="deleteEntry('${section}','${type}',${e.id})">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderDebtList() {
+    const el = document.getElementById('list-debt');
+    if (data.debts.length === 0) {
+      el.innerHTML = `<div class="empty-msg">No fixed debts added yet.</div>`;
+      return;
+    }
+    el.innerHTML = data.debts.map(d => `
+      <div class="debt-item">
+        <div class="tx-info">
+          <div class="tx-name">${d.name}</div>
+          <div class="tx-date">Monthly</div>
+        </div>
+        <div class="tx-right">
+          <div class="debt-amount">${fmt(d.amount)} / mo</div>
+          <button class="btn-del" onclick="deleteDebt(${d.id})">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function sum(arr) { return arr.reduce((a, b) => a + b.amount, 0); }
+
+  function renderAll() {
+    // Render lists
+    renderList('list-shop-income',      data.shop.income,     'shop',     'income');
+    renderList('list-shop-expense',     data.shop.expense,    'shop',     'expense');
+    renderList('list-personal-income',  data.personal.income, 'personal', 'income');
+    renderList('list-personal-expense', data.personal.expense,'personal', 'expense');
+    renderDebtList();
+
+    // Compute subtotals
+    const si = sum(data.shop.income);
+    const se = sum(data.shop.expense);
+    const pi = sum(data.personal.income);
+    const pe = sum(data.personal.expense);
+    const td = sum(data.debts);
+
+    document.getElementById('total-shop-income').textContent     = fmt(si);
+    document.getElementById('total-shop-expense').textContent    = fmt(se);
+    document.getElementById('total-personal-income').textContent = fmt(pi);
+    document.getElementById('total-personal-expense').textContent= fmt(pe);
+    document.getElementById('total-debt').textContent            = fmt(td);
+
+    // Summary bar
+    const totalIncome  = si + pi;
+    const totalExpense = se + pe;
+    const net = totalIncome - totalExpense - td;
+
+    document.getElementById('sum-income').textContent  = fmt(totalIncome);
+    document.getElementById('sum-expense').textContent = fmt(totalExpense);
+    document.getElementById('sum-debt').textContent    = fmt(td);
+
+    const netEl = document.getElementById('sum-net');
+    netEl.textContent = (net < 0 ? '- ' : '') + fmt(net);
+    netEl.style.color = net >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`section-${tab}`).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // Init
+  renderAll();
+</script>
+</body>
+</html>
