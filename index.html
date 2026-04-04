@@ -302,6 +302,34 @@
 
     .totals-row span { color: var(--muted); font-weight: 500; }
     .totals-row strong { font-size: 0.95rem; font-weight: 700; }
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 99px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      white-space: nowrap;
+      z-index: 999;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #toast.green { background: var(--accent-green); color: #fff; }
+    #toast.red   { background: var(--accent-red);   color: #fff; }
+    #toast.yellow{ background: var(--accent-yellow); color: #fff; }
   </style>
 </head>
 <body>
@@ -310,6 +338,9 @@
   <h1>Finance Manager</h1>
   <p>Track · Control · Grow</p>
 </header>
+
+<!-- Toast Notification -->
+<div id="toast"></div>
 
 <!-- Summary Bar -->
 <div class="summary-bar">
@@ -503,6 +534,16 @@
   listenPath('personal/expense',data.personal.expense);
   listenPath('debts',           data.debts);
 
+  // ── Toast ────────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show ' + type;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.className = ''; }, 2800);
+  }
+
   // ── Add / Delete ────────────────────────────────────────────────
   window.addEntry = function(section, type) {
     const nameEl   = document.getElementById(`${section}-${type === 'income' ? 'in' : 'out'}-name`);
@@ -519,10 +560,12 @@
     push(ref(db, `${section}/${type}`), { name, amount, date: today() });
     nameEl.value = '';
     amountEl.value = '';
+    showToast(type === 'income' ? '✅ Income added!' : '✅ Expense added!', 'green');
   };
 
   window.deleteEntry = function(section, type, id) {
     remove(ref(db, `${section}/${type}/${id}`));
+    showToast('🗑️ Entry deleted', 'red');
   };
 
   window.addDebt = function() {
@@ -540,10 +583,12 @@
     push(ref(db, 'debts'), { name, amount });
     nameEl.value = '';
     amountEl.value = '';
+    showToast('✅ Debt added!', 'yellow');
   };
 
   window.deleteDebt = function(id) {
     remove(ref(db, `debts/${id}`));
+    showToast('🗑️ Debt removed', 'red');
   };
 
   // ── Render ───────────────────────────────────────────────────────
