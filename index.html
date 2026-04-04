@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Finance Manager</title>
+  <title>Manajer Keuangan</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -335,8 +335,8 @@
 <body>
 
 <header>
-  <h1>Finance Manager</h1>
-  <p>Track · Control · Grow</p>
+  <h1>Manajer Keuangan</h1>
+  <p>Catat · Kelola · Berkembang</p>
 </header>
 
 <!-- Toast Notification -->
@@ -345,69 +345,69 @@
 <!-- Summary Bar -->
 <div class="summary-bar">
   <div class="summary-card green">
-    <div class="label">Total Income</div>
+    <div class="label">Total Pemasukan</div>
     <div class="amount" id="sum-income">Rp 0</div>
   </div>
   <div class="summary-card red">
-    <div class="label">Total Expenses</div>
+    <div class="label">Total Pengeluaran</div>
     <div class="amount" id="sum-expense">Rp 0</div>
   </div>
   <div class="summary-card yellow">
-    <div class="label">Fixed Debts/mo</div>
+    <div class="label">Cicilan Tetap/bln</div>
     <div class="amount" id="sum-debt">Rp 0</div>
   </div>
   <div class="summary-card net">
-    <div class="label">Net Balance</div>
+    <div class="label">Saldo Bersih</div>
     <div class="amount" id="sum-net">Rp 0</div>
   </div>
 </div>
 
 <!-- Tabs -->
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('shop')">🏪 Shop</button>
-  <button class="tab-btn" onclick="switchTab('personal')">🏠 Personal</button>
-  <button class="tab-btn" onclick="switchTab('debt')">📌 Fixed Debts</button>
+  <button class="tab-btn active" onclick="switchTab('shop')">🏪 Toko</button>
+  <button class="tab-btn" onclick="switchTab('personal')">🏠 Pribadi</button>
+  <button class="tab-btn" onclick="switchTab('debt')">📌 Cicilan Tetap</button>
 </div>
 
 <!-- SHOP SECTION -->
 <div class="section active" id="section-shop">
 
   <div class="panel">
-    <div class="panel-title">Shop Income</div>
+    <div class="panel-title">Pemasukan Toko</div>
     <div class="form-row">
       <div class="field">
-        <label>Description</label>
-        <input type="text" id="shop-in-name" placeholder="e.g. Sales today"/>
+        <label>Keterangan</label>
+        <input type="text" id="shop-in-name" placeholder="cth. Penjualan hari ini"/>
       </div>
       <div class="field">
-        <label>Amount (Rp)</label>
+        <label>Jumlah (Rp)</label>
         <input type="number" id="shop-in-amount" placeholder="0" min="0"/>
       </div>
-      <button class="btn-add" onclick="addEntry('shop','income')">+ Add</button>
+      <button class="btn-add" onclick="addEntry('shop','income')">+ Tambah</button>
     </div>
     <div class="tx-list" id="list-shop-income"></div>
     <div class="totals-row">
-      <span>Total Shop Income</span>
+      <span>Total Pemasukan Toko</span>
       <strong class="income" id="total-shop-income">Rp 0</strong>
     </div>
   </div>
 
   <div class="panel">
-    <div class="panel-title">Shop Expenses</div>
+    <div class="panel-title">Pengeluaran Toko</div>
     <div class="form-row">
       <div class="field">
-        <label>Description</label>
-        <input type="text" id="shop-out-name" placeholder="e.g. Stock purchase"/>
+        <label>Keterangan</label>
+        <input type="text" id="shop-out-name" placeholder="cth. Beli stok barang"/>
       </div>
       <div class="field">
-        <label>Amount (Rp)</label>
+        <label>Jumlah (Rp)</label>
         <input type="number" id="shop-out-amount" placeholder="0" min="0"/>
       </div>
-      <button class="btn-add" onclick="addEntry('shop','expense')">+ Add</button>
+      <button class="btn-add" onclick="addEntry('shop','expense')">+ Tambah</button>
     </div>
     <div class="tx-list" id="list-shop-expense"></div>
     <div class="totals-row">
-      <span>Total Shop Expenses</span>
+      <span>Total Pengeluaran Toko</span>
       <strong class="expense" id="total-shop-expense">Rp 0</strong>
     </div>
   </div>
@@ -418,41 +418,41 @@
 <div class="section" id="section-personal">
 
   <div class="panel">
-    <div class="panel-title">Personal Income</div>
+    <div class="panel-title">Pemasukan Pribadi</div>
     <div class="form-row">
       <div class="field">
-        <label>Description</label>
-        <input type="text" id="personal-in-name" placeholder="e.g. Salary"/>
+        <label>Keterangan</label>
+        <input type="text" id="personal-in-name" placeholder="cth. Gaji bulanan"/>
       </div>
       <div class="field">
-        <label>Amount (Rp)</label>
+        <label>Jumlah (Rp)</label>
         <input type="number" id="personal-in-amount" placeholder="0" min="0"/>
       </div>
-      <button class="btn-add" onclick="addEntry('personal','income')">+ Add</button>
+      <button class="btn-add" onclick="addEntry('personal','income')">+ Tambah</button>
     </div>
     <div class="tx-list" id="list-personal-income"></div>
     <div class="totals-row">
-      <span>Total Personal Income</span>
+      <span>Total Pemasukan Pribadi</span>
       <strong class="income" id="total-personal-income">Rp 0</strong>
     </div>
   </div>
 
   <div class="panel">
-    <div class="panel-title">Personal Expenses</div>
+    <div class="panel-title">Pengeluaran Pribadi</div>
     <div class="form-row">
       <div class="field">
-        <label>Description</label>
-        <input type="text" id="personal-out-name" placeholder="e.g. Groceries"/>
+        <label>Keterangan</label>
+        <input type="text" id="personal-out-name" placeholder="cth. Belanja bulanan"/>
       </div>
       <div class="field">
-        <label>Amount (Rp)</label>
+        <label>Jumlah (Rp)</label>
         <input type="number" id="personal-out-amount" placeholder="0" min="0"/>
       </div>
-      <button class="btn-add" onclick="addEntry('personal','expense')">+ Add</button>
+      <button class="btn-add" onclick="addEntry('personal','expense')">+ Tambah</button>
     </div>
     <div class="tx-list" id="list-personal-expense"></div>
     <div class="totals-row">
-      <span>Total Personal Expenses</span>
+      <span>Total Pengeluaran Pribadi</span>
       <strong class="expense" id="total-personal-expense">Rp 0</strong>
     </div>
   </div>
@@ -463,21 +463,21 @@
 <div class="section" id="section-debt">
 
   <div class="panel">
-    <div class="panel-title">Monthly Fixed Debts</div>
+    <div class="panel-title">Cicilan Tetap Bulanan</div>
     <div class="debt-form-row">
       <div class="field">
-        <label>Debt Name</label>
-        <input type="text" id="debt-name" placeholder="e.g. KPR, Kredit motor"/>
+        <label>Nama Cicilan</label>
+        <input type="text" id="debt-name" placeholder="cth. KPR, Kredit motor"/>
       </div>
       <div class="field">
-        <label>Monthly Amount (Rp)</label>
+        <label>Jumlah per Bulan (Rp)</label>
         <input type="number" id="debt-amount" placeholder="0" min="0"/>
       </div>
-      <button class="btn-add" onclick="addDebt()">+ Add</button>
+      <button class="btn-add" onclick="addDebt()">+ Tambah</button>
     </div>
     <div class="tx-list" id="list-debt"></div>
     <div class="totals-row">
-      <span>Total Fixed Debts / Month</span>
+      <span>Total Cicilan Tetap / Bulan</span>
       <strong style="color:var(--accent-yellow)" id="total-debt">Rp 0</strong>
     </div>
   </div>
@@ -560,12 +560,12 @@
     push(ref(db, `${section}/${type}`), { name, amount, date: today() });
     nameEl.value = '';
     amountEl.value = '';
-    showToast(type === 'income' ? '✅ Income added!' : '✅ Expense added!', 'green');
+    showToast(type === 'income' ? '✅ Pemasukan berhasil ditambahkan!' : '✅ Pengeluaran berhasil ditambahkan!', 'green');
   };
 
   window.deleteEntry = function(section, type, id) {
     remove(ref(db, `${section}/${type}/${id}`));
-    showToast('🗑️ Entry deleted', 'red');
+    showToast('🗑️ Data berhasil dihapus', 'red');
   };
 
   window.addDebt = function() {
@@ -583,12 +583,12 @@
     push(ref(db, 'debts'), { name, amount });
     nameEl.value = '';
     amountEl.value = '';
-    showToast('✅ Debt added!', 'yellow');
+    showToast('✅ Cicilan berhasil ditambahkan!', 'yellow');
   };
 
   window.deleteDebt = function(id) {
     remove(ref(db, `debts/${id}`));
-    showToast('🗑️ Debt removed', 'red');
+    showToast('🗑️ Cicilan berhasil dihapus', 'red');
   };
 
   // ── Render ───────────────────────────────────────────────────────
@@ -596,7 +596,7 @@
     const el = document.getElementById(listId);
     const arr = Object.entries(entries);
     if (arr.length === 0) {
-      el.innerHTML = `<div class="empty-msg">No entries yet.</div>`;
+      el.innerHTML = `<div class="empty-msg">Belum ada data.</div>`;
       return;
     }
     el.innerHTML = arr.map(([id, e]) => `
@@ -617,7 +617,7 @@
     const el = document.getElementById('list-debt');
     const arr = Object.entries(data.debts);
     if (arr.length === 0) {
-      el.innerHTML = `<div class="empty-msg">No fixed debts added yet.</div>`;
+      el.innerHTML = `<div class="empty-msg">Belum ada cicilan tetap.</div>`;
       return;
     }
     el.innerHTML = arr.map(([id, d]) => `
