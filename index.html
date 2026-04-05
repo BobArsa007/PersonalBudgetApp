@@ -144,12 +144,12 @@
     /* Form */
     .form-row {
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      grid-template-columns: 1fr 1fr 1fr auto;
       gap: 10px;
       align-items: end;
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr 1fr; }
       .form-row .btn-add { grid-column: 1 / -1; }
     }
@@ -330,6 +330,119 @@
     #toast.green { background: var(--accent-green); color: #fff; }
     #toast.red   { background: var(--accent-red);   color: #fff; }
     #toast.yellow{ background: var(--accent-yellow); color: #fff; }
+    .wallet-badge {
+      display: inline-block;
+      background: var(--accent-blue-bg);
+      color: var(--accent-blue);
+      font-size: 0.62rem;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 99px;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+
+    /* Wallet Bar */
+    .wallet-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .wallet-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .wallet-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .wallet-icon { font-size: 1.4rem; }
+
+    .wallet-info { flex: 1; }
+
+    .wallet-label {
+      font-size: 0.68rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .wallet-amount {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    .wallet-edit-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      width: 30px; height: 30px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.18s;
+      flex-shrink: 0;
+    }
+
+    .wallet-edit-btn:hover { background: var(--border); }
+
+    /* Modal */
+    #wallet-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 100;
+    }
+
+    #wallet-modal {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      width: min(320px, 90vw);
+      z-index: 101;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    #wallet-modal-overlay.open,
+    #wallet-modal.open { display: block; }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .btn-cancel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 9px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+
+    .btn-cancel:hover { background: var(--border); }
   </style>
 </head>
 <body>
@@ -362,9 +475,47 @@
   </div>
 </div>
 
+<!-- Wallet Cards -->
+<div class="wallet-bar">
+  <div class="wallet-card" id="wallet-brimo-card">
+    <div class="wallet-top">
+      <div class="wallet-icon">🏦</div>
+      <div class="wallet-info">
+        <div class="wallet-label">Saldo BRIMO</div>
+        <div class="wallet-amount" id="wallet-brimo-display">Rp 0</div>
+      </div>
+      <button class="wallet-edit-btn" onclick="openWalletEdit('brimo')" title="Edit">✏️</button>
+    </div>
+  </div>
+  <div class="wallet-card" id="wallet-cash-card">
+    <div class="wallet-top">
+      <div class="wallet-icon">💵</div>
+      <div class="wallet-info">
+        <div class="wallet-label">Saldo Cash</div>
+        <div class="wallet-amount" id="wallet-cash-display">Rp 0</div>
+      </div>
+      <button class="wallet-edit-btn" onclick="openWalletEdit('cash')" title="Edit">✏️</button>
+    </div>
+  </div>
+</div>
+
+<!-- Wallet Edit Modal -->
+<div id="wallet-modal-overlay" onclick="closeWalletEdit()"></div>
+<div id="wallet-modal">
+  <div class="modal-title" id="modal-title">Edit Saldo</div>
+  <div class="field" style="margin-bottom:14px">
+    <label>Jumlah (Rp)</label>
+    <input type="number" id="wallet-input" placeholder="0" min="0"/>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn-add" style="flex:1" onclick="saveWallet()">Simpan</button>
+    <button class="btn-cancel" onclick="closeWalletEdit()">Batal</button>
+  </div>
+</div>
+
 <!-- Tabs -->
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('shop')">🏪 Warung</button>
+  <button class="tab-btn active" onclick="switchTab('shop')">🏪 Toko</button>
   <button class="tab-btn" onclick="switchTab('personal')">🏠 Pribadi</button>
   <button class="tab-btn" onclick="switchTab('debt')">📌 Cicilan Tetap</button>
 </div>
@@ -373,7 +524,7 @@
 <div class="section active" id="section-shop">
 
   <div class="panel">
-    <div class="panel-title">Pemasukan Warung</div>
+    <div class="panel-title">Pemasukan Toko</div>
     <div class="form-row">
       <div class="field">
         <label>Keterangan</label>
@@ -383,17 +534,24 @@
         <label>Jumlah (Rp)</label>
         <input type="number" id="shop-in-amount" placeholder="0" min="0"/>
       </div>
+      <div class="field">
+        <label>Dompet</label>
+        <select id="shop-in-wallet">
+          <option value="brimo">🏦 BRIMO</option>
+          <option value="cash">💵 Cash</option>
+        </select>
+      </div>
       <button class="btn-add" onclick="addEntry('shop','income')">+ Tambah</button>
     </div>
     <div class="tx-list" id="list-shop-income"></div>
     <div class="totals-row">
-      <span>Total Pemasukan Warung</span>
+      <span>Total Pemasukan Toko</span>
       <strong class="income" id="total-shop-income">Rp 0</strong>
     </div>
   </div>
 
   <div class="panel">
-    <div class="panel-title">Pengeluaran Warung</div>
+    <div class="panel-title">Pengeluaran Toko</div>
     <div class="form-row">
       <div class="field">
         <label>Keterangan</label>
@@ -403,11 +561,18 @@
         <label>Jumlah (Rp)</label>
         <input type="number" id="shop-out-amount" placeholder="0" min="0"/>
       </div>
+      <div class="field">
+        <label>Dompet</label>
+        <select id="shop-out-wallet">
+          <option value="brimo">🏦 BRIMO</option>
+          <option value="cash">💵 Cash</option>
+        </select>
+      </div>
       <button class="btn-add" onclick="addEntry('shop','expense')">+ Tambah</button>
     </div>
     <div class="tx-list" id="list-shop-expense"></div>
     <div class="totals-row">
-      <span>Total Pengeluaran Warung</span>
+      <span>Total Pengeluaran Toko</span>
       <strong class="expense" id="total-shop-expense">Rp 0</strong>
     </div>
   </div>
@@ -428,6 +593,13 @@
         <label>Jumlah (Rp)</label>
         <input type="number" id="personal-in-amount" placeholder="0" min="0"/>
       </div>
+      <div class="field">
+        <label>Dompet</label>
+        <select id="personal-in-wallet">
+          <option value="brimo">🏦 BRIMO</option>
+          <option value="cash">💵 Cash</option>
+        </select>
+      </div>
       <button class="btn-add" onclick="addEntry('personal','income')">+ Tambah</button>
     </div>
     <div class="tx-list" id="list-personal-income"></div>
@@ -447,6 +619,13 @@
       <div class="field">
         <label>Jumlah (Rp)</label>
         <input type="number" id="personal-out-amount" placeholder="0" min="0"/>
+      </div>
+      <div class="field">
+        <label>Dompet</label>
+        <select id="personal-out-wallet">
+          <option value="brimo">🏦 BRIMO</option>
+          <option value="cash">💵 Cash</option>
+        </select>
       </div>
       <button class="btn-add" onclick="addEntry('personal','expense')">+ Tambah</button>
     </div>
@@ -487,7 +666,7 @@
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, remove, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCQ-6j4Vqv9mp0_HLQk8EqvadwO6UYIi1c",
@@ -534,6 +713,51 @@
   listenPath('personal/expense',data.personal.expense);
   listenPath('debts',           data.debts);
 
+  // ── Wallets ──────────────────────────────────────────────────────
+  const wallets = { brimo: 0, cash: 0 };
+  let activeWallet = null;
+
+  // Load wallet data from Firebase
+  onValue(ref(db, 'wallets'), snap => {
+    if (snap.exists()) {
+      const val = snap.val();
+      wallets.brimo = val.brimo || 0;
+      wallets.cash  = val.cash  || 0;
+    }
+    renderWallets();
+  });
+
+  function renderWallets() {
+    document.getElementById('wallet-brimo-display').textContent = fmt(wallets.brimo);
+    document.getElementById('wallet-cash-display').textContent  = fmt(wallets.cash);
+  }
+
+  window.openWalletEdit = function(wallet) {
+    activeWallet = wallet;
+    const labels = { brimo: 'Edit Saldo BRIMO', cash: 'Edit Saldo Cash' };
+    document.getElementById('modal-title').textContent = labels[wallet];
+    document.getElementById('wallet-input').value = wallets[wallet] || '';
+    document.getElementById('wallet-modal-overlay').classList.add('open');
+    document.getElementById('wallet-modal').classList.add('open');
+    setTimeout(() => document.getElementById('wallet-input').focus(), 100);
+  };
+
+  window.closeWalletEdit = function() {
+    document.getElementById('wallet-modal-overlay').classList.remove('open');
+    document.getElementById('wallet-modal').classList.remove('open');
+    activeWallet = null;
+  };
+
+  window.saveWallet = function() {
+    const val = parseFloat(document.getElementById('wallet-input').value);
+    if (isNaN(val) || val < 0) return;
+    wallets[activeWallet] = val;
+    set(ref(db, `wallets/${activeWallet}`), val);
+    renderWallets();
+    closeWalletEdit();
+    showToast(`✅ Saldo ${activeWallet === 'brimo' ? 'BRIMO' : 'Cash'} diperbarui!`, 'green');
+  };
+
   // ── Toast ────────────────────────────────────────────────────────
   let toastTimer;
   function showToast(msg, type = '') {
@@ -548,8 +772,10 @@
   window.addEntry = function(section, type) {
     const nameEl   = document.getElementById(`${section}-${type === 'income' ? 'in' : 'out'}-name`);
     const amountEl = document.getElementById(`${section}-${type === 'income' ? 'in' : 'out'}-amount`);
-    const name   = nameEl.value.trim();
-    const amount = parseFloat(amountEl.value);
+    const walletEl = document.getElementById(`${section}-${type === 'income' ? 'in' : 'out'}-wallet`);
+    const name     = nameEl.value.trim();
+    const amount   = parseFloat(amountEl.value);
+    const wallet   = walletEl.value;
 
     if (!name || isNaN(amount) || amount <= 0) {
       amountEl.style.borderColor = 'var(--accent-red)';
@@ -557,13 +783,30 @@
       return;
     }
 
-    push(ref(db, `${section}/${type}`), { name, amount, date: today() });
+    // Save entry with wallet info
+    push(ref(db, `${section}/${type}`), { name, amount, date: today(), wallet });
+
+    // Update wallet balance
+    const newBal = wallets[wallet] + (type === 'income' ? amount : -amount);
+    wallets[wallet] = newBal;
+    set(ref(db, `wallets/${wallet}`), newBal);
+    renderWallets();
+
     nameEl.value = '';
     amountEl.value = '';
     showToast(type === 'income' ? '✅ Pemasukan berhasil ditambahkan!' : '✅ Pengeluaran berhasil ditambahkan!', 'green');
   };
 
   window.deleteEntry = function(section, type, id) {
+    // Get the entry first to reverse wallet balance
+    const entry = (section === 'shop' ? data.shop : data.personal)[type][id];
+    if (entry && entry.wallet) {
+      const reversal = type === 'income' ? -entry.amount : entry.amount;
+      const newBal = wallets[entry.wallet] + reversal;
+      wallets[entry.wallet] = newBal;
+      set(ref(db, `wallets/${entry.wallet}`), newBal);
+      renderWallets();
+    }
     remove(ref(db, `${section}/${type}/${id}`));
     showToast('🗑️ Data berhasil dihapus', 'red');
   };
@@ -603,7 +846,7 @@
       <div class="tx-item">
         <div class="tx-info">
           <div class="tx-name">${e.name}</div>
-          <div class="tx-date">${e.date || ''}</div>
+          <div class="tx-date">${e.date || ''} ${e.wallet ? `<span class="wallet-badge">${e.wallet === 'brimo' ? '🏦 BRIMO' : '💵 Cash'}</span>` : ''}</div>
         </div>
         <div class="tx-right">
           <div class="tx-amount ${type}">${type === 'income' ? '+' : '-'} ${fmt(e.amount)}</div>
