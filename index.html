@@ -30,17 +30,17 @@
       color: var(--text);
       font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 100vh;
-      padding: 32px 20px 60px;
+      padding: 24px 14px 60px;
       max-width: 780px;
       margin: 0 auto;
     }
 
     header {
-      margin-bottom: 32px;
+      margin-bottom: 24px;
     }
 
     header h1 {
-      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-size: clamp(1.3rem, 5vw, 2rem);
       font-weight: 700;
       color: var(--text);
       letter-spacing: -0.5px;
@@ -48,36 +48,36 @@
 
     header p {
       color: var(--muted);
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       margin-top: 4px;
     }
 
     /* Summary Bar */
     .summary-bar {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 10px;
-      margin-bottom: 28px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
     }
 
     .summary-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 16px 18px;
+      padding: 12px 14px;
     }
 
     .summary-card .label {
-      font-size: 0.7rem;
+      font-size: 0.62rem;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: var(--muted);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .summary-card .amount {
-      font-size: 1.2rem;
+      font-size: clamp(0.95rem, 3.5vw, 1.2rem);
       font-weight: 700;
     }
 
@@ -90,11 +90,11 @@
     .tabs {
       display: flex;
       gap: 4px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       background: var(--surface2);
       border-radius: 10px;
       padding: 4px;
-      width: fit-content;
+      width: 100%;
     }
 
     .tab-btn {
@@ -102,12 +102,14 @@
       border: none;
       color: var(--muted);
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 500;
-      padding: 7px 16px;
+      padding: 7px 10px;
       border-radius: 7px;
       cursor: pointer;
       transition: all 0.18s;
+      flex: 1;
+      text-align: center;
     }
 
     .tab-btn:hover { color: var(--text); }
@@ -346,49 +348,54 @@
     .wallet-bar {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 28px;
+      gap: 8px;
+      margin-top: 8px;
+      margin-bottom: 20px;
     }
 
     .wallet-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 14px 16px;
+      padding: 12px 14px;
     }
 
     .wallet-top {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
-    .wallet-icon { font-size: 1.4rem; }
+    .wallet-icon { font-size: 1.2rem; flex-shrink: 0; }
 
-    .wallet-info { flex: 1; }
+    .wallet-info { flex: 1; min-width: 0; }
 
     .wallet-label {
-      font-size: 0.68rem;
+      font-size: 0.6rem;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: var(--muted);
-      margin-bottom: 3px;
+      margin-bottom: 2px;
+      white-space: nowrap;
     }
 
     .wallet-amount {
-      font-size: 1.1rem;
+      font-size: clamp(0.85rem, 3vw, 1.05rem);
       font-weight: 700;
       color: var(--accent-blue);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .wallet-edit-btn {
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 7px;
-      width: 30px; height: 30px;
+      width: 26px; height: 26px;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       display: flex; align-items: center; justify-content: center;
       transition: background 0.18s;
       flex-shrink: 0;
