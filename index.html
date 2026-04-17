@@ -488,6 +488,13 @@
         <option value="expense">Pengeluaran Saja</option>
       </select>
       <input type="month" id="rekap-filter-month" onchange="renderRekap()" title="Filter bulan"/>
+      <select id="rekap-sort" onchange="renderRekap()" title="Urutan">
+        <option value="date-desc">Terbaru</option>
+        <option value="date-asc">Terlama</option>
+        <option value="amount-desc">Terbesar</option>
+        <option value="amount-asc">Terkecil</option>
+        <option value="type">Tipe</option>
+      </select>
     </div>
     <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
   </div>
@@ -877,9 +884,26 @@
       </div>
     `;
 
-    // Breakdown columns
-    const incomes  = entries.filter(e => e.type==='income').sort((a,b)=>b.amount-a.amount);
-    const expenses = entries.filter(e => e.type==='expense').sort((a,b)=>b.amount-a.amount);
+    // Breakdown columns — respect same sort
+    const monthMap2 = { Jan:0,Feb:1,Mar:2,Apr:3,Mei:4,Jun:5,Jul:6,Agu:7,Sep:8,Okt:9,Nov:10,Des:11 };
+    function parseDateStr2(s) {
+      if (!s || s==='Bulanan') return 0;
+      const p = s.split(' ');
+      if (p.length!==3) return 0;
+      return new Date(parseInt(p[2]), monthMap2[p[1]]??0, parseInt(p[0])).getTime()||0;
+    }
+    const sortBy2 = document.getElementById('rekap-sort')?.value || 'date-desc';
+    function applySort(arr) {
+      return arr.slice().sort((a,b)=>{
+        if (sortBy2==='date-desc')   return parseDateStr2(b.date)-parseDateStr2(a.date);
+        if (sortBy2==='date-asc')    return parseDateStr2(a.date)-parseDateStr2(b.date);
+        if (sortBy2==='amount-desc') return b.amount-a.amount;
+        if (sortBy2==='amount-asc')  return a.amount-b.amount;
+        return b.amount-a.amount;
+      });
+    }
+    const incomes  = applySort(entries.filter(e => e.type==='income'));
+    const expenses = applySort(entries.filter(e => e.type==='expense'));
 
     const renderBreakdownList = (arr, type) => {
       if (arr.length === 0) return `<div class="rekap-empty">Tidak ada data.</div>`;
@@ -942,8 +966,22 @@
       log = log.filter(e => e.name.toLowerCase().includes(search) || e.category.includes(search));
     }
 
-    // Sort: income first, then expense, by amount desc
-    log.sort((a,b) => {
+    // Parse "DD Mon YYYY" → timestamp for date sorting
+    const monthMap = { Jan:0,Feb:1,Mar:2,Apr:3,Mei:4,Jun:5,Jul:6,Agu:7,Sep:8,Okt:9,Nov:10,Des:11 };
+    function parseDateStr(s) {
+      if (!s || s === 'Bulanan') return 0;
+      const p = s.split(' ');
+      if (p.length !== 3) return 0;
+      return new Date(parseInt(p[2]), monthMap[p[1]] ?? 0, parseInt(p[0])).getTime() || 0;
+    }
+
+    const sortBy = document.getElementById('rekap-sort')?.value || 'date-desc';
+    log.sort((a, b) => {
+      if (sortBy === 'date-desc') return parseDateStr(b.date) - parseDateStr(a.date);
+      if (sortBy === 'date-asc')  return parseDateStr(a.date) - parseDateStr(b.date);
+      if (sortBy === 'amount-desc') return b.amount - a.amount;
+      if (sortBy === 'amount-asc')  return a.amount - b.amount;
+      // 'type': income → expense → debt, then by amount desc within group
       const order = { income: 0, expense: 1, debt: 2 };
       if (order[a.type] !== order[b.type]) return order[a.type] - order[b.type];
       return b.amount - a.amount;
